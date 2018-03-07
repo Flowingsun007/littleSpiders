@@ -7,14 +7,16 @@
 1.程序主要利用itchat库实现了微信聊天自动回复功能，添加了weather、package、airlineTicket、trainTicket这几个.py文件
 将查天气、快递、机票、火车票的功能集成到了微信中，做到了发送关键词如：快递/火车/飞机/天气，自动回复相应内容并返回查询结果的功能！
 
-2.支持的微信消息类型：TEXT文本, PICTURE图片, MAP地点, CARD名片, NOTE笔记, SHARING分享, RECORDING语音, ATTACHMENT附件, VIDEO视频
+2.支持的微信消息类型：TEXT文本, PICTURE图片, MAP地点, CARD名片, NOTE通知, SHARING分享, RECORDING语音, ATTACHMENT附件, VIDEO视频
 其中查天气、快递、机票、火车票是在TEXT类型的消息中定义的；
-MAP类型的消息支持，自动回复地点名称，经纬度信息；CARD、NOTE、SHARING类型的消息无特别处理；
+MAP即地图类型的消息，自动回复地点名称，经纬度信息；
+CARD即名片类型，无特别处理，直接返回msg['content']；
+SHARING即分享类型，自动回复分享的链接；
+NOTE即通知类型，如果是红包，则回复“谢谢红包打赏💰💰😘😘...”否则msg['content']；
 PICTURE、RECORDING、ATTACHMENT、VIDEO支持自动下载到电脑，同时转发给“文件传输助手”查看。
 
 3.支持好友自行退订/开通自动回复（回复TDD退订/KTT开通）退订好友信息保存在——好友退订列表.txt文件中。
-原理：
-程序每次运行时自动读取.txt中的文件，将已经退订自动回复的好友信息加载到TDlist中，
+【原理】：程序每次运行时自动读取.txt中的文件，将已经退订自动回复的好友信息加载到TDlist中，
 做到对于在TDlist中的好友，不调用itchat.send()方法进行自动回复，起到了消息免打扰的功能！
 回复TDD，则好友动态加入TDlist列表，并将好友写入.txt中的文件中；
 回复KTT，则好友从TDlist移除，更新后的TDlist重新写入到.txt中保存。
@@ -118,10 +120,15 @@ def text_reply(msg):
         if msg['Type'] == 'Map':
             x, y, location = re.search(r"<location x=\"(.*?)\" y=\"(.*?)\".*label=\"(.*?)\".*", msg['OriContent']).group(1,2,3)
             replyContent = forselfContent = ("位置：" + location + "纬度：" + x + " 经度：" + y) if location else (r"位置: " + location)
-        else:
-            replyContent = forselfContent = typeDict2.get(msg['Type'],'未知类型') + msg['Content']
+        elif msg['Type'] == 'Sharing':
+            replyContent = forselfContent = typeDict2.get(msg['Type'],'未知类型') + "链接：\n" + msg['Url']
+        elif msg['Type'] == 'Note':
+            if "红包" in msg['Content']:
+                replyContent = forselfContent = ("(｡◕‿‿◕｡)谢谢红包打赏💰💰😘😘") if "红包" in msg['Content'] else (typeDict2.get(msg['Type'],'未知类型') + msg['Content'])
+        elif msg['Type'] == 'Card':
+            replyContent = forselfContent = typeDict2.get(msg['Type'],'未知类型消息') + msg['Content']
     else:
-        replyContent = forselfContent = "消息"
+        replyContent = forselfContent = "未知类型消息"
     itchat.send("【%s】\n%s（昵称：%s）发来%s:【%s】" % (time.strftime('%Y-%m-%d %H:%M:%S',time.localtime()),friend['NickName'], friend['RemarkName'], msg['Type'], forselfContent),toUserName='filehelper')
     if msg['FromUserName'] in TDlist:
         pass
