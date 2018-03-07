@@ -5,8 +5,8 @@
 import itchat
 itchat.auto_login(True)
 for friend in itchat.get_friends(update=True)[0:]:
-    #print(friend['NickName'],friend['RemarkName'],friend['Sex'],friend['Province'],friend['Signature'])
+    print(friend['NickName'],friend['RemarkName'],friend['Sex'],friend['Province'],friend['Signature'])
     img = itchat.get_head_img(userName=friend["UserName"])
-    path = "/Users/zhaoluyang/PythonProject/WeChat_Itchat/HeadImages/"+friend['NickName']+"("+friend['RemarkName']+").jpg"
+    path = "/Users/xxx/Wechat_headerImages/HeadImages/"+friend['NickName']+"("+friend['RemarkName']+").jpg"
     with open(path,'wb') as f:
         f.write(img)

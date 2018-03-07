@@ -5,7 +5,7 @@
 import os
 from math import sqrt
 from PIL import Image
-path = '/Users/zhaoluyang/PythonProject/WeChat_Itchat/HeadImages/'
+path = '/Users/xxx/Wechat_headerImages/HeadImages/'
 pathList = []
 for item in os.listdir(path):
     imgPath = os.path.join(path,item)
