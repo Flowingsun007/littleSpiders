@@ -12,8 +12,12 @@
 MAP类型的消息支持，自动回复地点名称，经纬度信息；CARD、NOTE、SHARING类型的消息无特别处理；
 PICTURE、RECORDING、ATTACHMENT、VIDEO支持自动下载到电脑，同时转发给“文件传输助手”查看。
 
-3.支持好友自行退订/开通自动回复（回复TDD退订/KTT开通）
-原理：使用了TDlist[]来放置所有退订自动回复的好友名称，做到对于这些退订消息的好友，不调用itchat.send()方法进行自动回复，起到了消息免打扰的功能！
+3.支持好友自行退订/开通自动回复（回复TDD退订/KTT开通）退订好友信息保存在——好友退订列表.txt文件中。
+原理：
+程序每次运行时自动读取.txt中的文件，将已经退订自动回复的好友信息加载到TDlist中，
+做到对于在TDlist中的好友，不调用itchat.send()方法进行自动回复，起到了消息免打扰的功能！
+回复TDD，则好友动态加入TDlist列表，并将好友写入.txt中的文件中；
+回复KTT，则好友从TDlist移除，更新后的TDlist重新写入到.txt中保存。
 
 4.自动回复好友消息的同时，也会将消息发送给自己的“文件传输助手”做备份！同时通过如下print语句，将消息打印在电脑控制台，方便查看
 print("于【%s】收到好友【%s（昵称：%s）】发来【%s】: 【%s】" .......
@@ -32,10 +36,15 @@ from weather import SearchWeather
 from package import getPackage
 from airlineTicket import getAirline
 from trainTicket import searchTrain
-
+fpath = '/Users/xxx/WeChat_autoReply/downloadFiles/'
 TDlist = []
+with open(fpath+u'好友退订列表.txt','r') as f:
+    for item in f.readlines():
+        TDlist.append(item.strip())
+
 @itchat.msg_register([TEXT, PICTURE, MAP, CARD, NOTE, SHARING, RECORDING, ATTACHMENT, VIDEO])
 def text_reply(msg):
+    global TDlist
     friend = itchat.search_friends(userName=msg['FromUserName'])
     replyContent = forselfContent = ""
     fpath = '/Users/xxx/WeChat_autoReply/downloadFiles/'
@@ -74,10 +83,14 @@ def text_reply(msg):
                     replyContent ="查询火车余票请输入：余票+车型+出发地+目的地+时间，其中可选车型d动车、g高铁、k快速、t特快、z直达（如：余票+dgz+南京+太原+2018-02-25）"
             elif re.search(r"TDD",msg['Content']):
                 TDlist.append(msg['FromUserName'])
+                with open(fpath+u'好友退订列表.txt','a+') as f:
+                    f.write(msg['FromUserName']+'\n')
                 itchat.send("😔自动回复功能已关闭，回复KTT可重新开通！",toUserName=msg['FromUserName'])
             elif re.search(r"KTT",msg['Content']):
                 if msg['FromUserName'] in TDlist:
                     TDlist.remove(msg['FromUserName'])
+                    with open(fpath+u'好友退订列表.txt','w') as f:
+                        f.write('\n'.join(TDlist))
                 replyContent = "亲🙂，终于等到你~自动回复功能已开通！"
         except Exception as e:
             print(repr(e))
