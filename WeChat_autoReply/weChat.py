@@ -2,6 +2,28 @@
 #coding = utf-8
 #author = 阳光流淌007
 #date = 2018-03-06
+"""
+【程序功能说明】
+1.程序主要利用itchat库实现了微信聊天自动回复功能，添加了weather、package、airlineTicket、trainTicket这几个.py文件
+将查天气、快递、机票、火车票的功能集成到了微信中，做到了发送关键词如：快递/火车/飞机/天气，自动回复相应内容并返回查询结果的功能！
+
+2.支持的微信消息类型：TEXT文本, PICTURE图片, MAP地点, CARD名片, NOTE笔记, SHARING分享, RECORDING语音, ATTACHMENT附件, VIDEO视频
+其中查天气、快递、机票、火车票是在TEXT类型的消息中定义的；
+MAP类型的消息支持，自动回复地点名称，经纬度信息；CARD、NOTE、SHARING类型的消息无特别处理；
+PICTURE、RECORDING、ATTACHMENT、VIDEO支持自动下载到电脑，同时转发给“文件传输助手”查看。
+
+3.支持好友自行退订/开通自动回复（回复TDD退订/KTT开通）
+原理：使用了TDlist[]来放置所有退订自动回复的好友名称，做到对于这些退订消息的好友，不调用itchat.send()方法进行自动回复，起到了消息免打扰的功能！
+
+4.自动回复好友消息的同时，也会将消息发送给自己的“文件传输助手”做备份！同时通过如下print语句，将消息打印在电脑控制台，方便查看
+print("于【%s】收到好友【%s（昵称：%s）】发来【%s】: 【%s】" .......
+print("于【%s】回复：收到您于xxx发送的【%s】,更多玩法。。。%s".......
+
+【配置和运行】
+本人运行环境：python3.6，macos系统
+使用之前请先配置所需的path路径，包括本程序中fpath；
+weather.py中pymysql的配置（详见知乎专栏文章：https://zhuanlan.zhihu.com/p/34207133）
+"""
 import re
 import time
 import itchat
@@ -16,7 +38,7 @@ TDlist = []
 def text_reply(msg):
     friend = itchat.search_friends(userName=msg['FromUserName'])
     replyContent = forselfContent = ""
-    fpath = '/Users/zhaoluyang/PythonProject/WeChat_Itchat/downloadFiles/'
+    fpath = '/Users/xxx/WeChat_autoReply/downloadFiles/'
     typeDict = {'Picture':'img','Video':'vid','Recording':'fil','Attachment':'fil'}
     typeDict2 = {'Card':'名片','Note':'通知','Sharing':'分享','Map':'位置'}
     replyModel = "收到您于%s发送的【%s】,更多玩法请回复：快递、火车、飞机、天气（回TDD/KTT可退订/开通此功能)" % (time.strftime('%m-%d %H:%M',time.localtime()), msg['Type'])
@@ -92,7 +114,7 @@ def text_reply(msg):
         pass
     else:
         itchat.send(replyModel,toUserName=msg['FromUserName']) if replyContent=='' else itchat.send(replyContent,toUserName=msg['FromUserName'])
-    print(msg)
+    #查看详细信息可以用print(msg)
     print("于【%s】收到好友【%s（昵称：%s）】发来【%s】: 【%s】" % (time.strftime('%Y-%m-%d %H:%M:%S',time.localtime()), friend['NickName'], friend['RemarkName'], msg['Type'], forselfContent))
     print("于【%s】回复：收到您于xxx发送的【%s】,更多玩法。。。%s" % (time.strftime('%Y-%m-%d %H:%M:%S',time.localtime()), msg['Type'],replyContent)+'\n')
 itchat.auto_login(hotReload=True)
