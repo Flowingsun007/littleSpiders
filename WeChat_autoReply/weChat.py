@@ -3,6 +3,7 @@
 #author = 阳光流淌007
 #date = 2018-03-06
 """
+程序功能演示和细节见知乎文章：https://zhuanlan.zhihu.com/p/34304821
 【程序功能说明】
 1.程序主要利用itchat库实现了微信聊天自动回复功能，添加了weather、package、airlineTicket、trainTicket这几个.py文件
 将查天气、快递、机票、火车票的功能集成到了微信中，做到了发送关键词如：快递/火车/飞机/天气，自动回复相应内容并返回查询结果的功能！
